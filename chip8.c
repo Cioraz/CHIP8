@@ -6,7 +6,7 @@
 #include "structs.h"
 #include "raylib.h"
 
-bool pause=false;
+bool pause=true;
 
 bool set_config(config_t *config,int argc,char **argv){
     config->window_h=32;
@@ -17,11 +17,76 @@ bool set_config(config_t *config,int argc,char **argv){
 }
 
 void handle_input(chip8_t *chip8){
-    (void)chip8;
-    if(IsKeyPressed(KEY_SPACE)) pause=!pause;
+    if(IsKeyPressed(KEY_SPACE)){
+        if(chip8->state==RUNNING){
+            chip8->state=PAUSED;
+            TraceLog(LOG_INFO,"Paused Currently!");
+        }else chip8->state=RUNNING;
+    }
+    if(IsKeyPressed(KEY_ESCAPE)) chip8->state=QUIT;
+}
+
+#ifdef DEBUG
+void print_debug_for_instruction(chip8_t *chip8){
+    char instruction_desc[1000];
+    snprintf(instruction_desc,sizeof instruction_desc,"Addr: %#04X, Opcode: %#04X, Desc: ",chip8->pc-2,chip8->instruction.opcode);
+    switch((chip8->instruction.opcode>>12)& 0x0F){
+        case 0x0:
+            if(chip8->instruction.NN==0xE0){
+                strcat(instruction_desc,"Clear Screen");
+            }else if(chip8->instruction.NN==0x0EE){
+                strcat(instruction_desc,"Return from Subroutine");
+            }
+            break;
+
+        case 0x02:
+            *chip8->stack_ptr++ = chip8->pc;
+            chip8->pc = chip8->instruction.NNN;
+            break;
+
+        default:
+            strcat(instruction_desc,"Unimplemented Opcode!");
+            break;
+    }
+    TraceLog(LOG_INFO,"%s",instruction_desc);
+}
+#endif
+
+void emulate_instruction(chip8_t *chip8){
+    chip8->instruction.opcode = chip8->ram[chip8->pc]<<8|chip8->ram[chip8->pc+1];
+    chip8->pc+=2;
+
+    chip8->instruction.NNN = chip8->instruction.opcode & 0x0FFF;
+    chip8->instruction.NN = chip8->instruction.opcode & 0x0FF;
+    chip8->instruction.N = chip8->instruction.opcode & 0x0F;
+    chip8->instruction.X = (chip8->instruction.opcode>>8) & 0x0F;
+    chip8->instruction.NNN = (chip8->instruction.opcode>>4) & 0x0F;
+
+#ifdef DEBUG
+    print_debug_for_instruction(chip8);
+#endif
+
+    switch((chip8->instruction.opcode>>12)& 0x0F){
+        case 0x0:
+            if(chip8->instruction.NN==0xE0){
+                memset(&chip8->display[0],false,sizeof chip8->display);
+            }else if(chip8->instruction.NN==0x0EE){
+                chip8->pc = *--chip8->stack_ptr;
+            }
+            break;
+
+        case 0x02:
+            *chip8->stack_ptr++ = chip8->pc;
+            chip8->pc = chip8->instruction.NNN;
+            break;
+
+        default:
+            break;
+    }
 }
 
 bool init_chip8(chip8_t *chip8,char *rom_name){
+    chip8->state=RUNNING;
     uint32_t entry = 0x200; 
     uint8_t font[] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0,		// 0
@@ -45,7 +110,7 @@ bool init_chip8(chip8_t *chip8,char *rom_name){
     memcpy(&chip8->ram[0],font,sizeof font);
     FILE *rom = fopen(rom_name,"rb");
     if(!rom){
-        printf("ROM %s doesnt exist \n",rom_name);
+        TraceLog(LOG_ERROR,"ROM %s doesnt exist \n",rom_name);
         return false;
     }
     fseek(rom,0,SEEK_END);
@@ -54,12 +119,12 @@ bool init_chip8(chip8_t *chip8,char *rom_name){
     rewind(rom);
 
     if(rom_size > max_size){
-        printf("Rom file out of size!\n");
+        TraceLog(LOG_ERROR,"Rom file out of size!\n");
         return false;
     }
 
     if(fread(&chip8->ram[entry],rom_size,1,rom)!=1){
-        printf("Unable to read Rom file %s\n",rom_name);
+        TraceLog(LOG_ERROR,"Unable to read Rom file %s\n",rom_name);
         return false;
     }
 
@@ -67,12 +132,19 @@ bool init_chip8(chip8_t *chip8,char *rom_name){
 
     chip8->pc = entry;
     chip8->rom_name = rom_name;
+    chip8->stack_ptr = &chip8->stack[0];
     return true;
 }
 
 int main(int argc,char **argv){
     (void)argc;
     (void)argv;
+    if(argc<2){
+        TraceLog(LOG_ERROR,"Usage: ./chip8 <ROM_NAME>");
+        exit(EXIT_FAILURE);
+    }
+
+    SetTraceLogLevel(LOG_ALL);
     config_t config;
     chip8_t *chip8 = malloc(sizeof(chip8_t));
 
@@ -81,12 +153,19 @@ int main(int argc,char **argv){
     if(!init_chip8(chip8,argv[1])) exit(EXIT_FAILURE);
 
     InitWindow(config.window_w*config.scale_factor,config.window_h*config.scale_factor,"CHIP8 Emulator");
-
-    while(!WindowShouldClose()){
+    while(chip8->state!=QUIT){
         handle_input(chip8);
-        BeginDrawing();
-        ClearBackground(BLACK);
-        EndDrawing();
+        if(chip8->state==PAUSED){
+            BeginDrawing();
+            ClearBackground(BLACK);
+            EndDrawing();
+        }else {
+            emulate_instruction(chip8);
+            BeginDrawing();
+            ClearBackground(BLACK);
+            // Draw your CHIP8 display here
+            EndDrawing();
+        }
     }
 
     CloseWindow();
