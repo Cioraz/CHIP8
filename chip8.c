@@ -29,20 +29,29 @@ void handle_input(chip8_t *chip8){
 #ifdef DEBUG
 void print_debug_for_instruction(chip8_t *chip8){
     char instruction_desc[1000];
-    snprintf(instruction_desc,sizeof instruction_desc,"Addr: %#04X, Opcode: %#04X, Desc: ",chip8->pc-2,chip8->instruction.opcode);
+    snprintf(instruction_desc,sizeof instruction_desc,"Addr: 0x%04X, Opcode: 0x%04X, Desc: ",chip8->pc-2,chip8->instruction.opcode);
     switch((chip8->instruction.opcode>>12)& 0x0F){
         case 0x0:
             if(chip8->instruction.NN==0xE0){
                 strcat(instruction_desc,"Clear Screen");
             }else if(chip8->instruction.NN==0x0EE){
-                strcat(instruction_desc,"Return from Subroutine");
-            }
+                strcat(instruction_desc,"Return from Subroutine to address");
+            }else strcat(instruction_desc,"Unimplemented Opcode!");
             break;
 
         case 0x02:
             *chip8->stack_ptr++ = chip8->pc;
             chip8->pc = chip8->instruction.NNN;
             break;
+        
+        case 0x6:
+            strcat(instruction_desc, "Set register V ");
+            sprintf(&instruction_desc[strlen(instruction_desc)], "%X", chip8->instruction.NNN);  // Efficient formatting within string
+            break; 
+
+       case 0x0A:
+            sprintf(instruction_desc + strlen(instruction_desc), "Set I to 0x%04X", chip8->instruction.NNN);
+            break; 
 
         default:
             strcat(instruction_desc,"Unimplemented Opcode!");
@@ -60,7 +69,7 @@ void emulate_instruction(chip8_t *chip8){
     chip8->instruction.NN = chip8->instruction.opcode & 0x0FF;
     chip8->instruction.N = chip8->instruction.opcode & 0x0F;
     chip8->instruction.X = (chip8->instruction.opcode>>8) & 0x0F;
-    chip8->instruction.NNN = (chip8->instruction.opcode>>4) & 0x0F;
+    chip8->instruction.Y = (chip8->instruction.opcode>>4) & 0x0F;
 
 #ifdef DEBUG
     print_debug_for_instruction(chip8);
@@ -75,9 +84,17 @@ void emulate_instruction(chip8_t *chip8){
             }
             break;
 
-        case 0x02:
+        case 0x2:
             *chip8->stack_ptr++ = chip8->pc;
             chip8->pc = chip8->instruction.NNN;
+            break;
+
+        case 0x6:
+            chip8->V[chip8->instruction.X] = chip8->instruction.NNN;
+            break;
+        
+        case 0xA:
+            chip8->index_reg = chip8->instruction.NNN;
             break;
 
         default:
