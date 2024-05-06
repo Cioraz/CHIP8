@@ -15,18 +15,18 @@ bool set_config(config_t *config,int argc,char **argv){
     return true;
 }
 
+// Input handler
 void handle_input(chip8_t *chip8){
     if(IsKeyPressed(KEY_SPACE)){
         if(chip8->state==RUNNING){
             chip8->state=PAUSED;
-            TraceLog(LOG_INFO,"Paused Currently!");
+            TraceLog(LOG_INFO,"CHIP8 Paused!");
         }else chip8->state=RUNNING;
     }
     if(IsKeyPressed(KEY_ESCAPE)) chip8->state=QUIT;
 }
 
 void emulate_instruction(chip8_t *chip8, config_t config){
-    (void) config;
     chip8->instruction.opcode = chip8->ram[chip8->pc]<<8|chip8->ram[chip8->pc+1];
     chip8->pc+=2;
 
@@ -40,7 +40,10 @@ void emulate_instruction(chip8_t *chip8, config_t config){
     print_debug_for_instruction(chip8);
 #endif
 
-    switch((chip8->instruction.opcode>>12)& 0x0F){
+    // Finding opcode category
+    uint8_t category=chip8->instruction.opcode>>12&0xF;
+
+    switch(category){
         case 0x0:
             if(chip8->instruction.NN==0xE0){
                 memset(&chip8->display[0],false,sizeof chip8->display);
@@ -58,17 +61,17 @@ void emulate_instruction(chip8_t *chip8, config_t config){
             chip8->pc = chip8->instruction.NNN;
             break;
 
-        // case 0x3:
-        //     if(chip8->V[chip8->instruction.X] == chip8->instruction.NN) chip8->pc+=2;
-        //     break;
+        case 0x3:
+            if(chip8->V[chip8->instruction.X] == chip8->instruction.NN) chip8->pc+=2;
+            break;
 
-        // case 0x4:
-        //     if(chip8->V[chip8->instruction.X] != chip8->instruction.NN) chip8->pc+=2;
-        //     break;
+        case 0x4:
+            if(chip8->V[chip8->instruction.X] != chip8->instruction.NN) chip8->pc+=2;
+            break;
 
-        // case 0x5:
-        //     if(chip8->V[chip8->instruction.X] == chip8->V[chip8->instruction.Y]) chip8->pc+=2;
-        //     break;
+        case 0x5:
+            if(chip8->V[chip8->instruction.X] == chip8->V[chip8->instruction.Y]) chip8->pc+=2;
+            break;
 
         case 0x6:
             chip8->V[chip8->instruction.X] = chip8->instruction.NNN;
@@ -78,54 +81,56 @@ void emulate_instruction(chip8_t *chip8, config_t config){
             chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]+chip8->instruction.NN;
             break;
 
-        // case 0x8:
-        //     switch(chip8->instruction.N){
-        //         case 0x0:
-        //             chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.Y];
-        //             break;
+        case 0x8:
+            switch(chip8->instruction.N){
+                case 0x0:
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.Y];
+                    break;
                 
-        //         case 0x1:
-        //             chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]|chip8->V[chip8->instruction.Y];
-        //             break;
+                case 0x1:
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]|chip8->V[chip8->instruction.Y];
+                    break;
 
-        //         case 0x2:
-        //             chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]&chip8->V[chip8->instruction.Y];
-        //             break;
+                case 0x2:
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]&chip8->V[chip8->instruction.Y];
+                    break;
 
-        //         case 0x3:
-        //             chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]^chip8->V[chip8->instruction.Y];
-        //             break;
+                case 0x3:
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]^chip8->V[chip8->instruction.Y];
+                    break;
 
-        //         case 0x4:
-        //             break;
+                case 0x4:
+                    break;
                 
-        //         case 0x5:
-        //             break;
+                case 0x5:
+                    break;
                 
-        //         case 0x6:
-        //             break;
+                case 0x6:
+                    break;
 
-        //         case 0x7:
-        //             break;
+                case 0x7:
+                    break;
 
-        //         case 0xE:
-        //             break;
-        //     }
-        //     break;
+                case 0xE:
+                    break;
+            }
+            break;
         
         case 0xA:
             chip8->index_reg = chip8->instruction.NNN;
             break;
         
         case 0xD:
+            // Wrap and find X and Y coords
             uint8_t X_coor=chip8->V[chip8->instruction.X]%config.window_w;
             uint8_t Y_coor=chip8->V[chip8->instruction.Y]%config.window_h;
+
             uint8_t mover = X_coor;
             chip8->V[0xF]=0;
 
-            // Loop over N rows 
+            // Loop over height of sprite
             for(uint8_t i=0;i<chip8->instruction.N;i++){
-                // Fetch next byte
+                // Fetch sprite data
                 uint8_t sprite=chip8->ram[chip8->index_reg+i];
                 X_coor=mover; // Restting X_coor for new row to draw
 
@@ -140,7 +145,6 @@ void emulate_instruction(chip8_t *chip8, config_t config){
                 }
                 // Stop entire sprite drawing if hits bottom edge
                 if(++Y_coor>=config.window_h) break;
-
             }
             break;
 
@@ -201,41 +205,52 @@ bool init_chip8(chip8_t *chip8,char *rom_name){
 }
 
 void updateScreen(chip8_t *chip8,config_t config){
+    // Setting rectangle dimensions
     int rect_x,rect_y;
     for(uint32_t i=0;i<sizeof chip8->display;i++){
         rect_x=(i%config.window_w)*config.scale_factor; 
         rect_y=(i/config.window_w)*config.scale_factor;
 
         // If pixel ON draw  white color
-        if(chip8->display[i]) DrawRectangle(rect_x,rect_y,config.scale_factor,config.scale_factor,WHITE);
+        if(chip8->display[i]) {
+            // Rect + outline
+            DrawRectangle(rect_x,rect_y,config.scale_factor,config.scale_factor,WHITE);
+            DrawRectangleLines(rect_x,rect_y,config.scale_factor,config.scale_factor,BLACK);
+        }
         // If pixel OFF draw black color
         else DrawRectangle(rect_x,rect_y,config.scale_factor,config.scale_factor,BLACK);
     } 
 }
 
+// Main Function
 int main(int argc,char **argv){
+    // Will use later
     (void)argc;
     (void)argv;
 
+    // Invalid inputs for args
     if(argc<2){
         TraceLog(LOG_ERROR,"Usage: ./chip8 <ROM_NAME>");
         exit(EXIT_FAILURE);
     }
 
+    // Logging info
     SetTraceLogLevel(LOG_ALL);
+
+    // Setting up configs
     config_t config;
     chip8_t *chip8 = malloc(sizeof(chip8_t));
 
     SetTargetFPS(60);
+
+    // Main configs
     if(!set_config(&config,argc,argv)) exit(EXIT_FAILURE);
     if(!init_chip8(chip8,argv[1])) exit(EXIT_FAILURE);
     InitWindow(config.window_w*config.scale_factor,config.window_h*config.scale_factor,"CHIP8 Emulator");
 
     while(chip8->state!=QUIT){
         handle_input(chip8);
-        if(chip8->state!=PAUSED){
-            emulate_instruction(chip8,config);
-        }
+        if(chip8->state!=PAUSED) emulate_instruction(chip8,config);
         BeginDrawing();
         ClearBackground(BLACK);
         updateScreen(chip8,config);

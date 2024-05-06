@@ -26,24 +26,24 @@ void print_debug_for_instruction(chip8_t *chip8) {
 
 
         case 0x2:
-            *chip8->stack_ptr++ = chip8->pc;
-            chip8->pc = chip8->instruction.NNN;
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Calling subroutine at 0x%04X",chip8->instruction.NNN);
             break;
         
-        // case 0x3:
-        //     desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-        //                             "VX==KK (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->instruction.NN,chip8->pc);
-        //     break;
+        case 0x3:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "VX==KK (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->instruction.NN,chip8->pc);
+            break;
 
-        // case 0x4:
-        //     desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-        //                             "VX!=KK (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->instruction.NN,chip8->pc);
-        //     break;
+        case 0x4:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "VX!=KK (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->instruction.NN,chip8->pc);
+            break;
 
-        // case 0x5:
-        //     desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-        //                             "VX==VY (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->V[chip8->instruction.Y],chip8->pc);
-        //     break;
+        case 0x5:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "VX==VY (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->V[chip8->instruction.Y],chip8->pc);
+            break;
 
 
 
@@ -62,7 +62,27 @@ void print_debug_for_instruction(chip8_t *chip8) {
                 case 0x0:
                     desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
                                     "Set VX=VY");
-            break;
+                    break;
+                
+                case 0x1:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Set VX=VX|VY");
+                    break;
+
+                case 0x2:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Set VX=VX&VY");
+                    break; 
+
+                case 0x3:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Set VX=VX^VY");
+                    break;  
+
+
+
+
+
             }
             break;
 
