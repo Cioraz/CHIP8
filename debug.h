@@ -71,6 +71,11 @@ void print_debug_for_instruction(chip8_t *chip8) {
                                     "Set I to 0x%04X", chip8->instruction.NNN);
             break;
 
+        case 0x0D:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Drawing N %u height sprite at V%X 0x%02X, V%X 0x%02X from I 0x%04X", chip8->instruction.N,chip8->instruction.X,chip8->V[chip8->instruction.X],chip8->instruction.Y,chip8->V[chip8->instruction.Y],chip8->index_reg);
+            break;
+
         default:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length, "Unimplemented Opcode!");
             break;
