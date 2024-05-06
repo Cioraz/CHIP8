@@ -23,6 +23,11 @@ typedef struct{
 } inst_t;
 
 typedef struct{
+    uint32_t x;
+    uint32_t y;
+} rect_t;
+
+typedef struct{
     emulator_state_t state;
     uint8_t ram[4096];
     uint16_t stack[12];

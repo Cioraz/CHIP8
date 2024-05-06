@@ -25,7 +25,8 @@ void handle_input(chip8_t *chip8){
     if(IsKeyPressed(KEY_ESCAPE)) chip8->state=QUIT;
 }
 
-void emulate_instruction(chip8_t *chip8){
+void emulate_instruction(chip8_t *chip8, config_t config){
+    (void) config;
     chip8->instruction.opcode = chip8->ram[chip8->pc]<<8|chip8->ram[chip8->pc+1];
     chip8->pc+=2;
 
@@ -48,22 +49,98 @@ void emulate_instruction(chip8_t *chip8){
             }
             break;
 
-        case 0x1:
-            chip8->pc=chip8->instruction.NNN;
-            break;
+        // case 0x1:
+        //     chip8->pc=chip8->instruction.NNN;
+        //     break;
 
         case 0x2:
             *chip8->stack_ptr++ = chip8->pc;
             chip8->pc = chip8->instruction.NNN;
             break;
 
+        case 0x3:
+            if(chip8->V[chip8->instruction.X] == chip8->instruction.NN) chip8->pc+=2;
+            break;
+
+        case 0x4:
+            if(chip8->V[chip8->instruction.X] != chip8->instruction.NN) chip8->pc+=2;
+            break;
+
+        case 0x5:
+            if(chip8->V[chip8->instruction.X] == chip8->V[chip8->instruction.Y]) chip8->pc+=2;
+            break;
+
         case 0x6:
             chip8->V[chip8->instruction.X] = chip8->instruction.NNN;
+            break;
+        
+        case 0x7:
+            chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]+chip8->instruction.NN;
+            break;
+
+        case 0x8:
+            switch(chip8->instruction.N){
+                case 0x0:
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.Y];
+                    break;
+                
+                case 0x1:
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]|chip8->V[chip8->instruction.Y];
+                    break;
+
+                case 0x2:
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]&chip8->V[chip8->instruction.Y];
+                    break;
+
+                case 0x3:
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]^chip8->V[chip8->instruction.Y];
+                    break;
+
+                case 0x4:
+                    break;
+                
+                case 0x5:
+                    break;
+                
+                case 0x6:
+                    break;
+
+                case 0x7:
+                    break;
+
+                case 0xE:
+                    break;
+            }
             break;
         
         case 0xA:
             chip8->index_reg = chip8->instruction.NNN;
             break;
+        
+        case 0xD:
+            uint8_t X=chip8->V[chip8->instruction.X]&config.window_w;
+            uint8_t Y=chip8->V[chip8->instruction.Y]&config.window_h;
+            uint8_t mover = X;
+            uint8_t width=8;
+            chip8->V[0xF]=0;
+            for(uint8_t i=0;i<chip8->instruction.N;++i){
+                uint8_t sprite=chip8->ram[chip8->index_reg+i];
+                X=mover; // Restting X for new row to draw
+                for(uint8_t j=7;j>=0;j--){
+                    bool *pixel = &chip8->display[Y*config.window_h+X];
+                    bool sprite_bit=sprite&(1<<j);
+                    if(*pixel && sprite_bit) chip8->V[0xF]=1;
+                    *pixel^=sprite_bit;
+
+                    // Stops drawing sprite if row hits right edge of screen
+                    if(++X>=config.window_w)break;
+                }
+                // Stop entire sprite drawing if hits bottom edge
+                if(++Y>=config.window_h) break;
+
+            }
+            break;
+
 
         default:
             break;
@@ -121,6 +198,14 @@ bool init_chip8(chip8_t *chip8,char *rom_name){
     return true;
 }
 
+void updateScreen(chip8_t *chip8,config_t config){
+    rect_t rect;
+    for(uint32_t i=0;i<chip8->display;i++){
+        rect.x=i%config.window_w;
+        rect.y=i/config.window_h;
+    } 
+}
+
 int main(int argc,char **argv){
     (void)argc;
     (void)argv;
@@ -145,8 +230,9 @@ int main(int argc,char **argv){
             ClearBackground(BLACK);
             EndDrawing();
         }else {
-            emulate_instruction(chip8);
+            emulate_instruction(chip8,config);
             BeginDrawing();
+            updateScreen(chip8,config);
             ClearBackground(BLACK);
             // Draw your CHIP8 display here
             EndDrawing();

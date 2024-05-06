@@ -25,14 +25,45 @@ void print_debug_for_instruction(chip8_t *chip8) {
             break;
 
 
-        case 0x02:
+        case 0x2:
             *chip8->stack_ptr++ = chip8->pc;
             chip8->pc = chip8->instruction.NNN;
             break;
+        
+        case 0x3:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "VX==KK (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->instruction.NN,chip8->pc);
+            break;
+
+        case 0x4:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "VX!=KK (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->instruction.NN,chip8->pc);
+            break;
+
+        case 0x5:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "VX==VY (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->V[chip8->instruction.Y],chip8->pc);
+            break;
+
+
 
         case 0x6:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
                                     "Set register V%X to 0x%02X",chip8->instruction.X, chip8->instruction.NN);
+            break;
+
+        case 0x7:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Updates VK by adding KK");
+            break;
+
+        case 0x8:
+            switch (chip8->instruction.N){
+                case 0x0:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Set VX=VY");
+            break;
+            }
             break;
 
         case 0x0A:
@@ -49,4 +80,3 @@ void print_debug_for_instruction(chip8_t *chip8) {
     TraceLog(LOG_INFO, "%s", instruction_desc);
 }
 #endif
-
