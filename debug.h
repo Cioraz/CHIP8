@@ -14,7 +14,7 @@ void print_debug_for_instruction(chip8_t *chip8) {
             if (chip8->instruction.NN == 0xE0)
                 desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length, "Clear Screen");
             else if (chip8->instruction.NN == 0x0EE)
-                desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length, "Return from Subroutine to address");
+                desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length, "Return from Subroutine to address 0x%04X",*(chip8->stack_ptr-1));
             else
                 desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length, "Unimplemented Opcode!");
             break;
@@ -32,17 +32,17 @@ void print_debug_for_instruction(chip8_t *chip8) {
         
         case 0x3:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-                                    "VX==KK (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->instruction.NN,chip8->pc);
+                                    "VX==KK (0x%02X,0x%02X) PC+=2 (if true)",chip8->V[chip8->instruction.X], chip8->instruction.NN);
             break;
 
         case 0x4:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-                                    "VX!=KK (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->instruction.NN,chip8->pc);
+                                    "VX!=KK (0x%02X,0x%02X) PC+=2 (if true)",chip8->V[chip8->instruction.X], chip8->instruction.NN);
             break;
 
         case 0x5:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-                                    "VX==VY (0x%04X,0x%04X) PC+=2 0x%04X",chip8->V[chip8->instruction.X], chip8->V[chip8->instruction.Y],chip8->pc);
+                                    "VX==VY (0x%02X,0x%02X) PC+=2 (if true)",chip8->V[chip8->instruction.X], chip8->V[chip8->instruction.Y]);
             break;
 
 
@@ -54,30 +54,51 @@ void print_debug_for_instruction(chip8_t *chip8) {
 
         case 0x7:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-                                    "Updates VK by adding KK");
+                                    "Initial V%X 0x%04X updated after adding (kk) 0x%02X to V%X Result:0x%04X",chip8->instruction.X,chip8->V[chip8->instruction.X],chip8->instruction.NN,chip8->instruction.X,chip8->V[chip8->instruction.X]+chip8->instruction.NN);
             break;
 
         case 0x8:
             switch (chip8->instruction.N){
                 case 0x0:
                     desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-                                    "Set VX=VY");
+                                    "ALU, Sets V%X=V%X 0x%04X",chip8->instruction.X,chip8->instruction.Y,chip8->V[chip8->instruction.Y]);
                     break;
                 
                 case 0x1:
                     desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-                                    "Set VX=VX|VY");
+                                    "ALU, Set V%X |= V%X, Result: 0x%04X",chip8->instruction.X,chip8->instruction.Y,chip8->instruction.X|chip8->instruction.Y);
                     break;
 
                 case 0x2:
                     desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-                                    "Set VX=VX&VY");
+                                    "ALU, Set V%X &= V%X, Result: 0x%04X",chip8->instruction.X,chip8->instruction.Y,chip8->instruction.X&chip8->instruction.Y);
                     break; 
 
                 case 0x3:
                     desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
-                                    "Set VX=VX^VY");
-                    break;  
+                                    "ALU, Set V%X ^= V%X, Result: 0x%04X",chip8->instruction.X,chip8->instruction.Y,chip8->instruction.X^chip8->instruction.Y);
+                    break; 
+
+                case 0x4:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "ALU, Set V%X+=V%x,if carry VF=1 (currently VF=%X), Result: 0x%04X",chip8->instruction.X,chip8->instruction.Y,((uint16_t)(chip8->V[chip8->instruction.X]+chip8->V[chip8->instruction.Y] > 255)),chip8->V[chip8->instruction.X]+chip8->V[chip8->instruction.Y]);
+                    break; 
+
+                case 0x5:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "ALU, Set V%X-=V%x,if no borrow VF=1 (currently VF=%X), Result: 0x%04X",chip8->instruction.X,chip8->instruction.Y,(chip8->V[chip8->instruction.X]>=chip8->V[chip8->instruction.Y]),chip8->V[chip8->instruction.X]+chip8->V[chip8->instruction.Y]);
+                    break; 
+
+                case 0x6:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "ALU, Set V%X>>=1,VF = bit shifted (current VF=%X), Result: 0x%04X",chip8->instruction.X,chip8->V[chip8->instruction.X]>>1,chip8->V[chip8->instruction.X]>>1);
+                    break; 
+
+
+
+                
+
+                
 
 
 

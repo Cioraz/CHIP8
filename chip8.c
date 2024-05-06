@@ -45,82 +45,124 @@ void emulate_instruction(chip8_t *chip8, config_t config){
 
     switch(category){
         case 0x0:
+            // 00E0: Clear Screen
             if(chip8->instruction.NN==0xE0){
                 memset(&chip8->display[0],false,sizeof chip8->display);
+            // 00EE: Return from subroutine
             }else if(chip8->instruction.NN==0x0EE){
                 chip8->pc = *--chip8->stack_ptr;
             }
             break;
 
         case 0x1:
+            // 1nnn: Jump to location nnn
             chip8->pc=chip8->instruction.NNN;
             break;
 
         case 0x2:
+            // 2nnn: Call subroutine at nnn
             *chip8->stack_ptr++ = chip8->pc;
             chip8->pc = chip8->instruction.NNN;
             break;
 
         case 0x3:
+            // 3xkk: Skip next inst if vx==kk
             if(chip8->V[chip8->instruction.X] == chip8->instruction.NN) chip8->pc+=2;
             break;
 
         case 0x4:
+            // 4xkk: Skip next inst if vx!=kk
             if(chip8->V[chip8->instruction.X] != chip8->instruction.NN) chip8->pc+=2;
             break;
 
         case 0x5:
+            // 5xy0: Skip next inst if vx==vy
             if(chip8->V[chip8->instruction.X] == chip8->V[chip8->instruction.Y]) chip8->pc+=2;
             break;
 
         case 0x6:
+            // 6xkk: Set vx==kk
             chip8->V[chip8->instruction.X] = chip8->instruction.NNN;
             break;
         
         case 0x7:
+            // 7xkk: Set vx=vx+kk
             chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]+chip8->instruction.NN;
             break;
 
         case 0x8:
             switch(chip8->instruction.N){
                 case 0x0:
+                    // 8xy0: Set vx=vy
                     chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.Y];
                     break;
                 
                 case 0x1:
+                    // 8xy1: Set vx=vx|vy
                     chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]|chip8->V[chip8->instruction.Y];
                     break;
 
                 case 0x2:
+                    // 8xy2: Set vx=vx&vy
                     chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]&chip8->V[chip8->instruction.Y];
                     break;
 
                 case 0x3:
+                    // 8xy3: Set vx=vx^vy
                     chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.X]^chip8->V[chip8->instruction.Y];
                     break;
 
                 case 0x4:
+                    // 8xy4: Set vx=vx+vy, if result more than 8 bit vf=1
+                    uint16_t result = chip8->V[chip8->instruction.X]+chip8->V[chip8->instruction.Y];
+                    if(result>255) chip8->V[0xF]=1;
+                    chip8->V[chip8->instruction.X]+=chip8->V[chip8->instruction.Y];
                     break;
                 
                 case 0x5:
+                    // 8xy5: Set vx=vx-vy, set vf= NOT borrow
+                    if(chip8->V[chip8->instruction.X]>=chip8->V[chip8->instruction.Y]) chip8->V[0xF]=1;
+                    chip8->V[chip8->instruction.X]-=chip8->V[chip8->instruction.Y];
                     break;
                 
-                case 0x6:
+                case 0x6:  
+                    // 8xy6: If least sig of vx=1, vf=1 and divide vx by 2
+                    chip8->V[0xF]=chip8->V[chip8->instruction.X]&1;
+                    chip8->V[chip8->instruction.X]>>=1;
                     break;
 
                 case 0x7:
+                    // 8xy7: If vy>vx set vf=1 and vx is sub from vy
+                    if(chip8->V[chip8->instruction.Y]>=chip8->V[chip8->instruction.X]) chip8->V[0xF]=1;
+                    chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.Y]-chip8->V[chip8->instruction.X];
                     break;
 
                 case 0xE:
+                    // 8xye: Skip inst if vx!=vy
+                    chip8->V[0xF]=(chip8->V[chip8->instruction.X]&0x80)>>7;
+                    chip8->V[chip8->instruction.X]<<=1;
                     break;
             }
             break;
-        
+
+        case 0x9:
+            // 9xy0: Skip next inst if vx!=vy
+            if(chip8->V[chip8->instruction.X]!=chip8->V[chip8->instruction.Y]) chip8->pc+=2;
+            break;
+
         case 0xA:
+            // annn: Set index_reg to nnn
             chip8->index_reg = chip8->instruction.NNN;
+            break;
+
+        case 0xB:
+            // bnnn: Jump to location nnn+v[0]
+            chip8->pc=chip8->V[0]+chip8->instruction.NNN;
             break;
         
         case 0xD:
+            // dxyn: Draw n byte sprite at mem location I at vx,vy and set vf=collision
+
             // Wrap and find X and Y coords
             uint8_t X_coor=chip8->V[chip8->instruction.X]%config.window_w;
             uint8_t Y_coor=chip8->V[chip8->instruction.Y]%config.window_h;
@@ -147,6 +189,11 @@ void emulate_instruction(chip8_t *chip8, config_t config){
                 if(++Y_coor>=config.window_h) break;
             }
             break;
+
+        case 0xF:
+            chip8->V[chip8->instruction.X]=chip8->deplay_timer;
+            break;
+
 
         default:
             break;
