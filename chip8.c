@@ -5,8 +5,7 @@
 
 #include "structs.h"
 #include "raylib.h"
-
-bool pause=true;
+#include "debug.h"
 
 bool set_config(config_t *config,int argc,char **argv){
     config->window_h=32;
@@ -25,41 +24,6 @@ void handle_input(chip8_t *chip8){
     }
     if(IsKeyPressed(KEY_ESCAPE)) chip8->state=QUIT;
 }
-
-#ifdef DEBUG
-void print_debug_for_instruction(chip8_t *chip8){
-    char instruction_desc[1000];
-    snprintf(instruction_desc,sizeof instruction_desc,"Addr: 0x%04X, Opcode: 0x%04X, Desc: ",chip8->pc-2,chip8->instruction.opcode);
-    switch((chip8->instruction.opcode>>12)& 0x0F){
-        case 0x0:
-            if(chip8->instruction.NN==0xE0){
-                strcat(instruction_desc,"Clear Screen");
-            }else if(chip8->instruction.NN==0x0EE){
-                strcat(instruction_desc,"Return from Subroutine to address");
-            }else strcat(instruction_desc,"Unimplemented Opcode!");
-            break;
-
-        case 0x02:
-            *chip8->stack_ptr++ = chip8->pc;
-            chip8->pc = chip8->instruction.NNN;
-            break;
-        
-        case 0x6:
-            strcat(instruction_desc, "Set register V ");
-            sprintf(&instruction_desc[strlen(instruction_desc)], "%X", chip8->instruction.NNN);  // Efficient formatting within string
-            break; 
-
-       case 0x0A:
-            sprintf(instruction_desc + strlen(instruction_desc), "Set I to 0x%04X", chip8->instruction.NNN);
-            break; 
-
-        default:
-            strcat(instruction_desc,"Unimplemented Opcode!");
-            break;
-    }
-    TraceLog(LOG_INFO,"%s",instruction_desc);
-}
-#endif
 
 void emulate_instruction(chip8_t *chip8){
     chip8->instruction.opcode = chip8->ram[chip8->pc]<<8|chip8->ram[chip8->pc+1];
@@ -82,6 +46,10 @@ void emulate_instruction(chip8_t *chip8){
             }else if(chip8->instruction.NN==0x0EE){
                 chip8->pc = *--chip8->stack_ptr;
             }
+            break;
+
+        case 0x1:
+            chip8->pc=chip8->instruction.NNN;
             break;
 
         case 0x2:
