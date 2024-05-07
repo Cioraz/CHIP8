@@ -107,15 +107,51 @@ void print_debug_for_instruction(chip8_t *chip8) {
             }
             break;
 
-        case 0x0A:
+        case 0xA:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
                                     "Set I to 0x%04X", chip8->instruction.NNN);
             break;
 
-        case 0x0D:
+        case 0xB:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Jumping to nnn(0x%04X)+V[0](0x%04X), Result: 0x%04X", chip8->instruction.NNN,chip8->V[0x0],chip8->instruction.NNN+chip8->V[0x0]);
+            break;
+
+        case 0xC:
+            desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Set V%X=rand()%%256 & NN(0x%04X)", chip8->instruction.X,chip8->instruction.NN);
+            break;
+
+        case 0xD:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
                                     "Drawing N %u height sprite at V%X 0x%02X, V%X 0x%02X from I 0x%04X", chip8->instruction.N,chip8->instruction.X,chip8->V[chip8->instruction.X],chip8->instruction.Y,chip8->V[chip8->instruction.Y],chip8->index_reg);
             break;
+
+        case 0xE:
+            switch(chip8->instruction.NN){
+                case 0x9E:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Skip inst if key in V%X is pressed, Keypad Val: %d", chip8->instruction.X,chip8->keys[chip8->V[chip8->instruction.X]]);
+                    break;
+
+                case 0xA1:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Skip inst if key in V%X is not pressed, Keypad Val: %d", chip8->instruction.X,chip8->keys[chip8->V[chip8->instruction.X]]);
+                    break;
+            }
+            break;
+
+        case 0xF:
+            switch(chip8->instruction.NN){
+                case 0x07:
+                    desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length,
+                                    "Set V%X to delay timer", chip8->instruction.X);
+                    break;
+
+            }
+            break;
+
+
 
         default:
             desc_length += snprintf(instruction_desc + desc_length, sizeof(instruction_desc) - desc_length, "Unimplemented Opcode!");

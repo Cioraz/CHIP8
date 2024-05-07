@@ -1,0 +1,131 @@
+INFO: TIMER: Target time per frame: 16.667 milliseconds
+INFO: Initializing raylib 5.1-dev
+INFO: Platform backend: DESKTOP (GLFW)
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... loaded (optional)
+INFO:     > raudio:.... loaded (optional)
+INFO: DISPLAY: Device initialized successfully
+INFO:     > Display size: 1920 x 1080
+INFO:     > Screen size:  1280 x 640
+INFO:     > Render size:  1280 x 640
+INFO:     > Viewport offsets: 0, 0
+INFO: GLAD: OpenGL extensions loaded successfully
+INFO: GL: Supported extensions count: 230
+INFO: GL: OpenGL device information:
+INFO:     > Vendor:   Intel
+INFO:     > Renderer: Mesa Intel(R) Xe Graphics (TGL GT2)
+INFO:     > Version:  4.6 (Core Profile) Mesa 24.0.6-arch1.2
+INFO:     > GLSL:     4.60
+INFO: GL: VAO extension detected, VAO functions loaded successfully
+INFO: GL: NPOT textures extension detected, full NPOT textures supported
+INFO: GL: DXT compressed textures supported
+INFO: GL: ETC2/EAC compressed textures supported
+INFO: PLATFORM: DESKTOP (GLFW): Initialized successfully
+INFO: TEXTURE: [ID 1] Texture loaded successfully (1x1 | R8G8B8A8 | 1 mipmaps)
+INFO: TEXTURE: [ID 1] Default texture loaded successfully
+INFO: SHADER: [ID 1] Vertex shader compiled successfully
+INFO: SHADER: [ID 2] Fragment shader compiled successfully
+INFO: SHADER: [ID 3] Program shader loaded successfully
+INFO: SHADER: [ID 3] Default shader loaded successfully
+INFO: RLGL: Render batch vertex buffers loaded successfully in RAM (CPU)
+INFO: RLGL: Render batch vertex buffers loaded successfully in VRAM (GPU)
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: TEXTURE: [ID 2] Texture loaded successfully (128x128 | GRAY_ALPHA | 1 mipmaps)
+INFO: FONT: Default font loaded successfully (224 glyphs)
+INFO: Addr: 0x0200, Opcode: 0x00E0, Desc: Clear Screen
+INFO: Addr: 0x0202, Opcode: 0x6300, Desc: Set register V3 to 0x00
+INFO: Addr: 0x0204, Opcode: 0x6401, Desc: Set register V4 to 0x01
+INFO: Addr: 0x0206, Opcode: 0x65EE, Desc: Set register V5 to 0xEE
+INFO: Addr: 0x0208, Opcode: 0x35EE, Desc: VX==KK (0xEE,0xEE) PC+=2 (if true)
+INFO: Addr: 0x020C, Opcode: 0x6300, Desc: Set register V3 to 0x00
+INFO: Addr: 0x020E, Opcode: 0x6402, Desc: Set register V4 to 0x02
+INFO: Addr: 0x0210, Opcode: 0x65EE, Desc: Set register V5 to 0xEE
+INFO: Addr: 0x0212, Opcode: 0x66EE, Desc: Set register V6 to 0xEE
+INFO: Addr: 0x0214, Opcode: 0x5560, Desc: VX==VY (0xEE,0xEE) PC+=2 (if true)
+INFO: Addr: 0x0218, Opcode: 0x6300, Desc: Set register V3 to 0x00
+INFO: Addr: 0x021A, Opcode: 0x6403, Desc: Set register V4 to 0x03
+INFO: Addr: 0x021C, Opcode: 0x65EE, Desc: Set register V5 to 0xEE
+INFO: Addr: 0x021E, Opcode: 0x45FD, Desc: VX!=KK (0xEE,0xFD) PC+=2 (if true)
+INFO: Addr: 0x0222, Opcode: 0x6300, Desc: Set register V3 to 0x00
+INFO: Addr: 0x0224, Opcode: 0x6404, Desc: Set register V4 to 0x04
+INFO: Addr: 0x0226, Opcode: 0x65EE, Desc: Set register V5 to 0xEE
+INFO: Addr: 0x0228, Opcode: 0x7501, Desc: Initial V5 0x00EE updated after adding (kk) 0x01 to V5 Result:0x00EF
+INFO: Addr: 0x022A, Opcode: 0x35EF, Desc: VX==KK (0xEF,0xEF) PC+=2 (if true)
+INFO: Addr: 0x022E, Opcode: 0x6300, Desc: Set register V3 to 0x00
+INFO: Addr: 0x0230, Opcode: 0x6405, Desc: Set register V4 to 0x05
+INFO: Addr: 0x0232, Opcode: 0x6F01, Desc: Set register VF to 0x01
+INFO: Addr: 0x0234, Opcode: 0x65EE, Desc: Set register V5 to 0xEE
+INFO: Addr: 0x0236, Opcode: 0x66EF, Desc: Set register V6 to 0xEF
+INFO: Addr: 0x0238, Opcode: 0x8565, Desc: ALU, Set V5-=V6,if no borrow VF=1 (currently VF=0), Result: 0x01DD
+INFO: Addr: 0x023A, Opcode: 0x3F00, Desc: VX==KK (0x01,0x00) PC+=2 (if true)
+INFO: Addr: 0x023C, Opcode: 0x1310, Desc: Set PC to NNN 0x0310
+INFO: Addr: 0x0310, Opcode: 0xA32A, Desc: Set I to 0x032A
+INFO: Addr: 0x0312, Opcode: 0x6013, Desc: Set register V0 to 0x13
+INFO: Addr: 0x0314, Opcode: 0x6109, Desc: Set register V1 to 0x09
+INFO: Addr: 0x0316, Opcode: 0xD018, Desc: Drawing N 8 height sprite at V0 0x13, V1 0x09 from I 0x032A
+INFO: Addr: 0x0318, Opcode: 0xF329, Desc: 
+INFO: Addr: 0x031A, Opcode: 0x6022, Desc: Set register V0 to 0x22
+INFO: Addr: 0x031C, Opcode: 0x610B, Desc: Set register V1 to 0x0B
+INFO: Addr: 0x031E, Opcode: 0xD015, Desc: Drawing N 5 height sprite at V0 0x22, V1 0x0B from I 0x032A
+INFO: Addr: 0x0320, Opcode: 0xF429, Desc: 
+INFO: Addr: 0x0322, Opcode: 0x6028, Desc: Set register V0 to 0x28
+INFO: Addr: 0x0324, Opcode: 0x610B, Desc: Set register V1 to 0x0B
+INFO: Addr: 0x0326, Opcode: 0xD015, Desc: Drawing N 5 height sprite at V0 0x28, V1 0x0B from I 0x032A
+INFO: Addr: 0x0328, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: Addr: 0x030E, Opcode: 0x130E, Desc: Set PC to NNN 0x030E
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+INFO: SHADER: [ID 3] Default shader unloaded successfully
+INFO: TEXTURE: [ID 1] Default texture unloaded successfully
+INFO: Window closed successfully

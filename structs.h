@@ -5,6 +5,7 @@ typedef struct{
     uint32_t window_h;
     uint32_t window_w;
     uint32_t scale_factor;
+    uint32_t emulation_speed;
 } config_t;
 
 typedef enum{

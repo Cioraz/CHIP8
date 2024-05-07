@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 #include "structs.h"
 #include "raylib.h"
@@ -11,19 +12,46 @@ bool set_config(config_t *config,int argc,char **argv){
     config->window_h=32;
     config->window_w=64;
     config->scale_factor=20;
+    config->emulation_speed=800; // 800 Instructions speed
     for(int i=1;i<argc;i++) (void)argv[i];
     return true;
 }
 
 // Input handler
 void handle_input(chip8_t *chip8){
-    if(IsKeyPressed(KEY_SPACE)){
-        if(chip8->state==RUNNING){
-            chip8->state=PAUSED;
-            TraceLog(LOG_INFO,"CHIP8 Paused!");
-        }else chip8->state=RUNNING;
+    switch(GetKeyPressed()){
+        case KEY_SPACE:
+            if(chip8->state==RUNNING){
+                chip8->state=PAUSED;
+                TraceLog(LOG_INFO,"CHIP8 Paused!");
+            }else chip8->state=RUNNING;
+            break;
+        
+        case KEY_ESCAPE: chip8->state=QUIT;break;
+
+        case KEY_ONE: chip8->keys[0x1]=true;break;
+        case KEY_TWO: chip8->keys[0x2]=true;break;
+        case KEY_THREE: chip8->keys[0x3]=true;break;
+        case KEY_FOUR: chip8->keys[0xC]=true;break;
+
+        case KEY_Q: chip8->keys[0x4]=true;break;
+        case KEY_W: chip8->keys[0x5]=true;break;
+        case KEY_E: chip8->keys[0x6]=true;TraceLog(LOG_INFO,"ON!");break;
+        case KEY_R: chip8->keys[0xD]=true;break;
+
+        case KEY_A: chip8->keys[0x7]=true;break;
+        case KEY_S: chip8->keys[0x8]=true;break;
+        case KEY_D: chip8->keys[0x9]=true;break;
+        case KEY_F: chip8->keys[0xE]=true;break;
+
+        case KEY_Z: chip8->keys[0xA]=true;break;
+        case KEY_X: chip8->keys[0x0]=true;break;
+        case KEY_C: chip8->keys[0xB]=true;break;
+        case KEY_V: chip8->keys[0xF]=true;break;
+
+        default: break;
+
     }
-    if(IsKeyPressed(KEY_ESCAPE)) chip8->state=QUIT;
 }
 
 void emulate_instruction(chip8_t *chip8, config_t config){
@@ -121,7 +149,9 @@ void emulate_instruction(chip8_t *chip8, config_t config){
                 
                 case 0x5:
                     // 8xy5: Set vx=vx-vy, set vf= NOT borrow
-                    if(chip8->V[chip8->instruction.X]>=chip8->V[chip8->instruction.Y]) chip8->V[0xF]=1;
+                    // if(chip8->V[chip8->instruction.X]<chip8->V[chip8->instruction.Y]) chip8->V[0xF]=1;
+                    // chip8->V[chip8->instruction.X]-=chip8->V[chip8->instruction.Y];
+                    chip8->V[0xF]=chip8->V[chip8->instruction.X]>=chip8->V[chip8->instruction.Y];
                     chip8->V[chip8->instruction.X]-=chip8->V[chip8->instruction.Y];
                     break;
                 
@@ -132,8 +162,8 @@ void emulate_instruction(chip8_t *chip8, config_t config){
                     break;
 
                 case 0x7:
-                    // 8xy7: If vy>vx set vf=1 and vx is sub from vy
-                    if(chip8->V[chip8->instruction.Y]>=chip8->V[chip8->instruction.X]) chip8->V[0xF]=1;
+                    // 8xy7: If vy>vx set vf=1 and vx is sub from vy (vx=vy-vx)
+                    chip8->V[0xF]=chip8->V[chip8->instruction.Y]>=chip8->V[chip8->instruction.X];
                     chip8->V[chip8->instruction.X]=chip8->V[chip8->instruction.Y]-chip8->V[chip8->instruction.X];
                     break;
 
@@ -159,7 +189,12 @@ void emulate_instruction(chip8_t *chip8, config_t config){
             // bnnn: Jump to location nnn+v[0]
             chip8->pc=chip8->V[0]+chip8->instruction.NNN;
             break;
-        
+
+        case 0xC:
+            // cnnn: Set vx=rand()%256 & NN
+            chip8->V[chip8->instruction.X] = (rand()%256) & chip8->instruction.NN;
+            break; 
+
         case 0xD:
             // dxyn: Draw n byte sprite at mem location I at vx,vy and set vf=collision
 
@@ -190,9 +225,81 @@ void emulate_instruction(chip8_t *chip8, config_t config){
             }
             break;
 
-        case 0xF:
-            chip8->V[chip8->instruction.X]=chip8->deplay_timer;
+        case 0xE:
+            switch(chip8->instruction.NN){
+                case 0x9E:
+                    if(chip8->keys[chip8->V[chip8->instruction.X]]) chip8->pc+=2;
+                    break;
+                
+                case 0xA1:
+                    if(!chip8->keys[chip8->V[chip8->instruction.X]]) chip8->pc+=2;
+                    break;
+            }
             break;
+
+        case 0xF:
+            switch(chip8->instruction.NN){
+                case 0x07:
+                    chip8->V[chip8->instruction.X]=chip8->deplay_timer;
+                    break;
+
+                case 0x0A:
+                    bool is_key_pressed=false;
+                    for(uint8_t i=0;i<sizeof chip8->keys;i++){
+                        if(chip8->display[i]){
+                            chip8->V[chip8->instruction.X]=i;
+                            is_key_pressed=true;
+                            break;
+                        }
+                    }
+                    // Stay with current opcode
+                    if(!is_key_pressed) chip8->pc-=2;
+                    break;
+
+                case 0x15:
+                    chip8->deplay_timer=chip8->V[chip8->instruction.X];
+                    break;
+
+                case 0x18:
+                    chip8->sound_timer=chip8->V[chip8->instruction.X];
+                    break;
+
+                case 0x1E:
+                    chip8->index_reg+=chip8->V[chip8->instruction.X];
+                    break;
+
+                case 0x29:
+                    // fx29: I=sprite_addr[vx]
+                    // catch
+                    chip8->index_reg=chip8->V[chip8->instruction.X]*5;
+                    break;
+                
+                case 0x33:
+                    // fx33: Store BCD of VX 
+                    // I -> 100s digit, I+1 -> 10s digit, I+2 -> 1s digit
+                    uint8_t bcd_repr=chip8->V[chip8->instruction.X];
+                    chip8->ram[chip8->index_reg+2]=bcd_repr%10;
+                    bcd_repr/=10;
+                    chip8->ram[chip8->index_reg+1]=bcd_repr%10;
+                    bcd_repr/=10;
+                    chip8->ram[chip8->index_reg]=bcd_repr;
+                    break;
+
+                case 0x55:
+                    for(uint8_t i=0;i<=chip8->instruction.X;i++){
+                        chip8->ram[chip8->index_reg+i]=chip8->V[i];
+                    }
+                    break;
+
+                case 0x65:
+                    for(uint8_t i=0;i<=chip8->instruction.X;i++){
+                        chip8->V[i]=chip8->ram[chip8->index_reg+i];
+                    }
+                    break;
+
+
+            }
+
 
 
         default:
@@ -251,6 +358,11 @@ bool init_chip8(chip8_t *chip8,char *rom_name){
     return true;
 }
 
+void updateTimers(chip8_t *chip8){
+    if(chip8->deplay_timer>0) chip8->deplay_timer--;
+    // Do sound timer
+}
+
 void updateScreen(chip8_t *chip8,config_t config){
     // Setting rectangle dimensions
     int rect_x,rect_y;
@@ -287,20 +399,28 @@ int main(int argc,char **argv){
     // Setting up configs
     config_t config;
     chip8_t *chip8 = malloc(sizeof(chip8_t));
+    uint32_t FPS=60;
 
-    SetTargetFPS(60);
+    SetTargetFPS(FPS);
 
     // Main configs
     if(!set_config(&config,argc,argv)) exit(EXIT_FAILURE);
     if(!init_chip8(chip8,argv[1])) exit(EXIT_FAILURE);
     InitWindow(config.window_w*config.scale_factor,config.window_h*config.scale_factor,"CHIP8 Emulator");
 
+    // Seeding the random num gen
+    srand(time(NULL));
+
     while(chip8->state!=QUIT){
         handle_input(chip8);
-        if(chip8->state!=PAUSED) emulate_instruction(chip8,config);
+        if(chip8->state!=PAUSED) {
+            // for(uint32_t i=0;i<config.emulation_speed/FPS;i++) emulate_instruction(chip8,config);
+            emulate_instruction(chip8,config);
+        }
         BeginDrawing();
         ClearBackground(BLACK);
         updateScreen(chip8,config);
+        updateTimers(chip8);
         EndDrawing();
 
     }
