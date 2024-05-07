@@ -27,32 +27,135 @@ void handle_input(chip8_t *chip8){
             }else chip8->state=RUNNING;
             break;
         
-        case KEY_ESCAPE: chip8->state=QUIT;break;
+        case KEY_ESCAPE:
+            chip8->state=QUIT;
+            break;
+        
+    } 
 
-        case KEY_ONE: chip8->keys[0x1]=true;break;
-        case KEY_TWO: chip8->keys[0x2]=true;break;
-        case KEY_THREE: chip8->keys[0x3]=true;break;
-        case KEY_FOUR: chip8->keys[0xC]=true;break;
+    // ON
+    if(IsKeyDown(KEY_ONE)) chip8->keys[0x1]=true;
+    if(IsKeyDown(KEY_TWO)) chip8->keys[0x2]=true;
+    if(IsKeyDown(KEY_THREE)) chip8->keys[0x3]=true;
+    if(IsKeyDown(KEY_FOUR)) chip8->keys[0xC]=true;
 
-        case KEY_Q: chip8->keys[0x4]=true;break;
-        case KEY_W: chip8->keys[0x5]=true;break;
-        case KEY_E: chip8->keys[0x6]=true;TraceLog(LOG_INFO,"ON!");break;
-        case KEY_R: chip8->keys[0xD]=true;break;
+    if(IsKeyDown(KEY_Q)) chip8->keys[0x4]=true;
+    if(IsKeyDown(KEY_W)) chip8->keys[0x5]=true;
+    if(IsKeyDown(KEY_E)) chip8->keys[0x6]=true;
+    if(IsKeyDown(KEY_R)) chip8->keys[0xD]=true;
 
-        case KEY_A: chip8->keys[0x7]=true;break;
-        case KEY_S: chip8->keys[0x8]=true;break;
-        case KEY_D: chip8->keys[0x9]=true;break;
-        case KEY_F: chip8->keys[0xE]=true;break;
+    if(IsKeyDown(KEY_A)) chip8->keys[0x7]=true;
+    if(IsKeyDown(KEY_S)) chip8->keys[0x8]=true;
+    if(IsKeyDown(KEY_D)) chip8->keys[0x9]=true;
+    if(IsKeyDown(KEY_F)) chip8->keys[0xE]=true;
 
-        case KEY_Z: chip8->keys[0xA]=true;break;
-        case KEY_X: chip8->keys[0x0]=true;break;
-        case KEY_C: chip8->keys[0xB]=true;break;
-        case KEY_V: chip8->keys[0xF]=true;break;
+    if(IsKeyDown(KEY_Z)) chip8->keys[0xA]=true;
+    if(IsKeyDown(KEY_X)) chip8->keys[0x0]=true;
+    if(IsKeyDown(KEY_C)) chip8->keys[0xB]=true;
+    if(IsKeyDown(KEY_V)) chip8->keys[0xF]=true;
 
-        default: break;
+    // OFF
+    if(IsKeyUp(KEY_ONE)) chip8->keys[0x1]=false;
+    if(IsKeyUp(KEY_TWO)) chip8->keys[0x2]=false;
+    if(IsKeyUp(KEY_THREE)) chip8->keys[0x3]=false;
+    if(IsKeyUp(KEY_FOUR)) chip8->keys[0xC]=false;
 
-    }
+    if(IsKeyUp(KEY_Q)) chip8->keys[0x4]=false;
+    if(IsKeyUp(KEY_W)) chip8->keys[0x5]=false;
+    if(IsKeyUp(KEY_E)) chip8->keys[0x6]=false;
+    if(IsKeyUp(KEY_R)) chip8->keys[0xD]=false;
+
+    if(IsKeyUp(KEY_A)) chip8->keys[0x7]=false;
+    if(IsKeyUp(KEY_S)) chip8->keys[0x8]=false;
+    if(IsKeyUp(KEY_D)) chip8->keys[0x9]=false;
+    if(IsKeyUp(KEY_F)) chip8->keys[0xE]=false;
+
+    if(IsKeyUp(KEY_Z)) chip8->keys[0xA]=false;
+    if(IsKeyUp(KEY_X)) chip8->keys[0x0]=false;
+    if(IsKeyUp(KEY_C)) chip8->keys[0xB]=false;
+    if(IsKeyUp(KEY_V)) chip8->keys[0xF]=false;
+    // if KEY_THREE: chip8->keys[0x3]=true;break;
+    // if KEY_FOUR: chip8->keys[0xC]=true;break;
+
+    // case KEY_Q: chip8->keys[0x4]=true;break;
+    // case KEY_W: chip8->keys[0x5]=true;break;
+    // case KEY_E: chip8->keys[0x6]=true;TraceLog(LOG_INFO,"ON!");break;
+    // case KEY_R: chip8->keys[0xD]=true;break;
+
+    // case KEY_A: chip8->keys[0x7]=true;break;
+    // case KEY_S: chip8->keys[0x8]=true;break;
+    // case KEY_D: chip8->keys[0x9]=true;break;
+    // case KEY_F: chip8->keys[0xE]=true;break;
+
+    // case KEY_Z: chip8->keys[0xA]=true;break;
+    // case KEY_X: chip8->keys[0x0]=true;break;
+    // case KEY_C: chip8->keys[0xB]=true;break;
+    // case KEY_V: chip8->keys[0xF]=true;break;
+
+    // if(IsKeyDown(key_id)){
+    //     switch(key_id){
+    //     case KEY_SPACE:
+    //         if(chip8->state==RUNNING){
+    //             chip8->state=PAUSED;
+    //             TraceLog(LOG_INFO,"CHIP8 Paused!");
+    //         }else chip8->state=RUNNING;
+    //         break;
+        
+        // case KEY_ESCAPE: chip8->state=QUIT;break;
+
+        // case KEY_ONE: chip8->keys[0x1]=true;break;
+        // case KEY_TWO: chip8->keys[0x2]=true;break;
+        // case KEY_THREE: chip8->keys[0x3]=true;break;
+        // case KEY_FOUR: chip8->keys[0xC]=true;break;
+
+        // case KEY_Q: chip8->keys[0x4]=true;break;
+        // case KEY_W: chip8->keys[0x5]=true;break;
+        // case KEY_E: chip8->keys[0x6]=true;TraceLog(LOG_INFO,"ON!");break;
+        // case KEY_R: chip8->keys[0xD]=true;break;
+
+        // case KEY_A: chip8->keys[0x7]=true;break;
+        // case KEY_S: chip8->keys[0x8]=true;break;
+        // case KEY_D: chip8->keys[0x9]=true;break;
+        // case KEY_F: chip8->keys[0xE]=true;break;
+
+        // case KEY_Z: chip8->keys[0xA]=true;break;
+        // case KEY_X: chip8->keys[0x0]=true;break;
+        // case KEY_C: chip8->keys[0xB]=true;break;
+        // case KEY_V: chip8->keys[0xF]=true;break;
+
+        // default: break;
+
+    //}
+    // }
+    // if(IsKeyUp(key_id)){
+    //     switch(key_id){
+    //     case KEY_ONE: chip8->keys[0x1]=false;break;
+    //     case KEY_TWO: chip8->keys[0x2]=false;break;
+    //     case KEY_THREE: chip8->keys[0x3]=false;break;
+    //     case KEY_FOUR: chip8->keys[0xC]=false;break;
+
+    //     case KEY_Q: chip8->keys[0x4]=false;break;
+    //     case KEY_W: chip8->keys[0x5]=false;break;
+    //     case KEY_E: chip8->keys[0x6]=false;TraceLog(LOG_INFO,"ON!");break;
+    //     case KEY_R: chip8->keys[0xD]=false;break;
+
+    //     case KEY_A: chip8->keys[0x7]=false;break;
+    //     case KEY_S: chip8->keys[0x8]=false;break;
+    //     case KEY_D: chip8->keys[0x9]=false;break;
+    //     case KEY_F: chip8->keys[0xE]=false;break;
+
+    //     case KEY_Z: chip8->keys[0xA]=false;break;
+    //     case KEY_X: chip8->keys[0x0]=false;break;
+    //     case KEY_C: chip8->keys[0xB]=false;break;
+    //     case KEY_V: chip8->keys[0xF]=false;break;
+
+    //     default: break;
+
+    // }
+    // }
 }
+
+    
 
 void emulate_instruction(chip8_t *chip8, config_t config){
     chip8->instruction.opcode = chip8->ram[chip8->pc]<<8|chip8->ram[chip8->pc+1];
@@ -414,7 +517,7 @@ int main(int argc,char **argv){
     while(chip8->state!=QUIT){
         handle_input(chip8);
         if(chip8->state!=PAUSED) {
-            // for(uint32_t i=0;i<config.emulation_speed/FPS;i++) emulate_instruction(chip8,config);
+            for(uint32_t i=0;i<config.emulation_speed/FPS;i++) emulate_instruction(chip8,config);
             emulate_instruction(chip8,config);
         }
         BeginDrawing();
